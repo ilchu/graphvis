@@ -102,6 +102,14 @@ const getPostsQuery = gql`
           username
         }
       }
+      # childPosts {
+      #   id
+      #   type
+      #   writer {
+      #     id
+      #     username
+      #   }
+      # }
       interactions {
         id
         type
@@ -164,7 +172,7 @@ export default function LoadDataAndGraph() {
     <div>
     {data.posts.map((post) => (
       <div>
-      ID: {post.id} / Type: {post.type}
+      Name: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
       </div>
     )
     )}
