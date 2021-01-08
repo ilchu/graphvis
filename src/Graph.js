@@ -52,12 +52,6 @@ function Graph (props) {
 
     console.log('members ==>', members);
    
-    test.posts.forEach((post) => {
-      post.parentPost ? post.parentPost = new Array(post.parentPost.id) : delete post.parentPost;
-    });
-
-    
-     
     console.log('test ==>', test);
 
     // series.data = test.posts;
@@ -90,10 +84,10 @@ function Graph (props) {
     return () => {
       x.dispose();
     };
-  }, []);
+  }, [props.data]);
 
   return (
-    <div id="chartdiv" style={{ width: "100%", height: "500px", }}></div>
+    <div id="chartdiv" style={{ width: "100%", height: "600px", }}></div>
   );
 }
 
