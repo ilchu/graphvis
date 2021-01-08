@@ -24,13 +24,27 @@ function Graph (props) {
       let ind = _.findIndex(result, ['username', post.writer.username]);
       if (ind !== -1) {
         result[ind].postsCount += 1;
-        !!post.parentPost && result[ind].links.push(post.parentPost.writer.id)
-      } else { 
+        if (post.parentPost !== null) {
+          let link = result[ind].links.find(link => link === post.parentPost.writer.id);
+          let width = result[ind].linkWidths[post.parentPost.writer.id];
+          if (!link) {
+            result[ind].links.push(post.parentPost.writer.id);
+          }
+          if (!!width) {
+            result[ind].linkWidths[post.parentPost.writer.id] += 1;
+          }
+          else {
+            result[ind].linkWidths[post.parentPost.writer.id] = 1;
+            }
+        }
+      }
+      else { 
         result.push({
           username: post.writer.username,
           id: post.writer.id,
           postsCount: 1,
-          links: (!!post.parentPost ? new Array(post.parentPost.writer.id) : []),
+          links: (!!post.parentPost ? [post.parentPost.writer.id] : []),
+          linkWidths: (!!post.parentPost ? {[post.parentPost.writer.id]: 1} : {}),
         })
       }
       return result;
@@ -54,6 +68,16 @@ function Graph (props) {
     series.dataFields.linkWith = "links";
     series.dataFields.value = "postsCount"
     console.log('series.dataItems ==>', series.dataItems);
+
+    series.links.template.adapter.add("strokeWidth", function(width, target) {
+      let from = target.source;
+      let to = target.target;
+      let widths = from.dataItem.dataContext.linkWidths;
+      if (widths && widths[to.dataItem.id]) {
+        return widths[to.dataItem.id];
+      }
+      return width;
+    })
 
     series.nodes.template.label.text = "{username}";
     series.nodes.template.tooltipText = "Post count: {postsCount}";

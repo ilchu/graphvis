@@ -72,7 +72,10 @@ const getActivityQuery = gql`
             username
           }
         }
-        interactions {type}
+        interactions {
+          type
+          actor {username}
+          }
       }
     }
   }
@@ -102,14 +105,6 @@ const getPostsQuery = gql`
           username
         }
       }
-      # childPosts {
-      #   id
-      #   type
-      #   writer {
-      #     id
-      #     username
-      #   }
-      # }
       interactions {
         id
         type
@@ -170,13 +165,21 @@ export default function LoadDataAndGraph() {
 
   return (
     <div>
-    {data.posts.map((post) => (
-      <div>
-      Name: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
-      </div>
-    )
-    )}
-    <Graph data={data}/>
+      <h3>Posts:</h3>
+      {data.posts.map((post) => (
+        <div>
+        Name: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
+        </div>
+      )
+      )}
+      {/* <h3>Interactions:</h3>
+      {data.posts.map((post) => (
+        <div>
+        Actor: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
+        </div>
+      )
+      )} */}
+      <Graph data={data}/>
     </div>
   );
 }
