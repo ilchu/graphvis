@@ -91,6 +91,7 @@ function Graph (props) {
       let to = target.target;
       let widthsFrom = from.dataItem.dataContext.linkWidths;
       let widthsTo = to.dataItem.dataContext.linkWidths;
+      // Should it really be 1? Does it lead to links where they should not be?
       let widthTotal = 1;
       if (widthsFrom && widthsFrom[to.dataItem.id]) {
         widthTotal += widthsFrom[to.dataItem.id];

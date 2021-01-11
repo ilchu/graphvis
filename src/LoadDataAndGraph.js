@@ -180,13 +180,15 @@ export default function LoadDataAndGraph() {
         </div>
       )
       )}
-      {/* <h3>Interactions:</h3>
-      {data.posts.map((post) => (
+      <h3>Interactions:</h3>
+      {data.posts.map((post) => (post.interactions.map(interaction => (
         <div>
-        Actor: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
+          Interaction: {interaction.actor.username} / Type: {interaction.type}
         </div>
       )
-      )} */}
+      )
+      )
+      )}
       <Graph data={data}/>
     </div>
   );
