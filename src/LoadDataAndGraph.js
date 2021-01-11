@@ -52,6 +52,10 @@ LoadDataAndGraph.fragments = {
   `,
 };
 
+
+const GROUP_ID = "5fe17e24563de738c3a21661";
+const ACT_ID = "5fe3e6f8563de738c3a21774";
+
 const getActivityQuery = gql`
   query getActivity($groupId: ID!, $actId: ID!) {
     activities (where: {group: $groupId, id: $actId}) {
@@ -82,9 +86,6 @@ const getActivityQuery = gql`
   ${LoadDataAndGraph.fragments.content}
   `;
 
-const GROUP_ID = "5fe17e24563de738c3a21661";
-const ACT_ID = "5fe3e6f8563de738c3a21774";
-
 const getPostsQuery = gql`
   query getPosts($actId: ID!) {
     posts(where: {activity: $actId}) {
@@ -93,6 +94,14 @@ const getPostsQuery = gql`
       activity {
         id
         name
+        interactions {
+          id
+          type
+          actor {
+            id
+            username
+          }
+        }
         }
       writer {
         id
@@ -138,7 +147,6 @@ export default function LoadDataAndGraph() {
   );
 
 
-  console.log('cache ==>', client.cache.data.data);
   console.log('data ==>', data);
   // test.forEach((post) => {post.content = post.content[0]});
   // let res = []

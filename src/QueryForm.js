@@ -16,7 +16,7 @@ export default function QueryForm() {
     <form onSubmit={handleSubmit}>
       <label>Pick a query: 
         <select value={option} onChange={handleChange}>
-          <option value="member">Member</option>
+          <option value="activity">Activity</option>
           <option value="group">Group</option>
           <option value="workspace">Workspace</option>
         </select>
