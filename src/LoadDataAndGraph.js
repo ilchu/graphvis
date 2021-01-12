@@ -1,5 +1,5 @@
 import React from 'react';
-import { gql, useQuery, useApolloClient} from "@apollo/client";
+import { gql, useQuery} from "@apollo/client";
 import Graph from "./Graph"
 
 LoadDataAndGraph.fragments = {
@@ -50,14 +50,37 @@ LoadDataAndGraph.fragments = {
     }
   }
   `,
+  interaction: gql`
+  fragment interactionFields on Interaction {
+    id
+    type
+    actor {
+      id
+      username}
+  }
+  `,
+  activity: gql`
+  fragment activityFields on Activity {
+    id
+    name
+    interactions {
+      id
+      type
+      actor {
+        id
+        username
+      }
+    }
+  }
+  `,
 };
 
 
 const GROUP_ID = "5fe17e24563de738c3a21661";
 const ACT_ID = "5fe3e6f8563de738c3a21774";
 
-const getActivityQuery = gql`
-  query getActivity($groupId: ID!, $actId: ID!) {
+const getActivitiesQuery = gql`
+  query getActivities($groupId: ID!, $actId: ID!) {
     activities (where: {group: $groupId, id: $actId}) {
       name
       posts {
@@ -86,23 +109,11 @@ const getActivityQuery = gql`
   ${LoadDataAndGraph.fragments.content}
   `;
 
-const getPostsQuery = gql`
+const GET_POSTS = gql`
   query getPosts($actId: ID!) {
     posts(where: {activity: $actId}) {
       id
       type
-      activity {
-        id
-        name
-        interactions {
-          id
-          type
-          actor {
-            id
-            username
-          }
-        }
-        }
       writer {
         id
         username
@@ -115,61 +126,41 @@ const getPostsQuery = gql`
         }
       }
       interactions {
-        id
-        type
-        actor {
-          id
-          username
-        }
+        ... interactionFields
       }
     }
   }
-  `;
+  ${LoadDataAndGraph.fragments.interaction}
+`;  
 
+
+const GET_ACTIVITY = gql`
+  query getActivity($actId: ID!) {
+    activity(id: $actId) {
+        ... activityFields
+        }
+      }
+      ${LoadDataAndGraph.fragments.activity}
+    `;
 
 // Testing display of query results
 export default function LoadDataAndGraph() {
 
-  const client = useApolloClient();
+  const { loading, error, data } = useQuery(GET_POSTS, {
+    variables: {"actId": ACT_ID},});
 
-  const { loading, error, data } = useQuery(getPostsQuery,
+
+
+  const { loading:loadingActivity, error:errorActivity, data:activity } = useQuery(GET_ACTIVITY,
     {variables: {"actId": ACT_ID},});
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error : {error.message} </p>;
-  if (!data) return <p>No data</p>;
 
-
-  Object.keys(client.cache.data.data).forEach(key => {
-    key.match(/^Member/) && (client.cache.data.data[key].test = "hey!");
-    
-  }
-  );
-
+  if (loading || loadingActivity) return <p>Loading posts and activity data...</p>;
+  if (error || errorActivity) return <p>Error : {error.message} </p>;
+  if (!data) return <p>No posts found</p>;
 
   console.log('data ==>', data);
-  // test.forEach((post) => {post.content = post.content[0]});
-  // let res = []
-  // for (let activity of test) {
-  //   res.push({});
-  //   for (let field of Object.keys(activity)) {
-  //     if (activity[field]) res[res.length-1][field] = activity[field];
-  //   }
-  // }
-
-//   for (let activity of test) {
-//     for (let field in activity) {
-//       if (activity[field] != null) {
-//         // console.log(activity[field]);
-//         res[activity.name][field] = activity[field];
-//     }
-//   }
-// }
-  // test.forEach((activity) => Object.keys(activity).forEach((i) => ((activity[i] != null) && delete(activity[i]))));
-  // test.forEach((activity) => {Object.keys(activity).forEach((field) => {console.log(field)}console.log(activity);});
-  // test.forEach(elem => {Object.keys(elem).forEach((key) => (elem[key] == null) && delete elem[key])});
-  // console.log('test ==>', test);
-  // console.log('res ==>', res);
+  console.log('activity ==>', activity);
 
   return (
     <div>
@@ -189,7 +180,7 @@ export default function LoadDataAndGraph() {
       )
       )
       )}
-      <Graph data={data}/>
+      <Graph posts={data} activity={activity}/>
     </div>
   );
 }

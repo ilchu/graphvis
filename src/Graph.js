@@ -8,15 +8,32 @@ function Graph (props) {
   // return null;
   const chart = useRef(null);
 
-  console.log('Graph received ==>', props.data);
+  console.log('Graph received posts ==>', props.posts.posts);
+  console.log('Graph received activity ==>', props.activity);
   
+  /**
+   * This function creates a field called linkWidths
+   * and populates it in a way suitable for further
+   * graph rendering
+   * @param {Object} result an object that will contain the new field and is modified in place
+   * @param {Object} target an object that is used as input. Should contain an id field
+   */
+  const populateLinkWidths = (result, target) => {
+    let width = result.linkWidths[target.id];
+    if (!width) {
+      result.linkWidths[target.id] = 1;
+    }
+    else {
+      result.linkWidths[target.id] += 1;
+      }
+  }
   
   useLayoutEffect(() => {
 
     let x = am4core.create("chartdiv", am4plugins_forceDirected.ForceDirectedTree);
     let series = x.series.push(new am4plugins_forceDirected.ForceDirectedSeries());
 
-    let test = _.cloneDeep(props.data);
+    let test = _.cloneDeep(props.posts);
 
 
     let members = [];
@@ -25,17 +42,7 @@ function Graph (props) {
       if (ind !== -1) {
         result[ind].postsCount += 1;
         if (post.parentPost !== null) {
-          let link = result[ind].links.find(link => link === post.parentPost.writer.id);
-          let width = result[ind].linkWidths[post.parentPost.writer.id];
-          if (!link) {
-            result[ind].links.push(post.parentPost.writer.id);
-          }
-          if (!width) {
-            result[ind].linkWidths[post.parentPost.writer.id] = 1;
-          }
-          else {
-            result[ind].linkWidths[post.parentPost.writer.id] += 1;
-            }
+          populateLinkWidths(result[ind], post.parentPost.writer);
         }
       }
       else { 
@@ -43,7 +50,6 @@ function Graph (props) {
           name: post.writer.username,
           id: post.writer.id,
           postsCount: 1,
-          links: (!!post.parentPost ? [post.parentPost.writer.id] : []),
           linkWidths: (!!post.parentPost ? {[post.parentPost.writer.id]: 1} : {}),
         })
       }
@@ -52,34 +58,28 @@ function Graph (props) {
           ind = result.length - 1;
         }
         post.interactions.forEach(interaction => {
-          let link = result[ind].links.find(link => link === interaction.actor.id);
-          let width = result[ind].linkWidths[interaction.actor.id];
-          if (!link) {
-            result[ind].links.push(interaction.actor.id);
-          }
-          if (!width) {
-            result[ind].linkWidths[interaction.actor.id] = 1;
-          }
-          else {
-            result[ind].linkWidths[interaction.actor.id] += 1;
-            }
-        })
+          populateLinkWidths(result[ind], interaction.actor);
+        });
       }
       return result;
     }, members); 
+    members.forEach(member => {member.links = Object.keys(member.linkWidths)});
 
     console.log('members ==>', members);
     
     // fix the links width and links to fetch from a single field instead of two?
     // fix adding links for self likes?
+    // const addActivity = (sourceQuery, targetArray) => {};
     let activity = [{
-      name: test.posts[0].activity.name,
-      id: test.posts[0].activity.id,
+      name: props.activity.activity.name,
+      id: props.activity.activity.id,
       postsCount: test.posts.length,
       children: [],
     }];
+
+    console.log('activity ==>', activity);
     
-    _.reduce(test.posts[0].activity.interactions, function(result, interaction) {
+    _.reduce(props.activity.activity.interactions, function(result, interaction) {
 
       let ind = _.findIndex(result, ['name', interaction.actor.username]);
       // if not found, create a new entry
@@ -88,26 +88,16 @@ function Graph (props) {
           name: interaction.actor.username,
           id: interaction.actor.id,
           postsCount: 0,
-          links: [],
           linkWidths: {[activity[0].id]: 1},
         });
       }
-      // found element, update its links and linkWidths
       else {
-      let link = result[ind].links.find(link => link === interaction.actor.id);
-      let width = result[ind].linkWidths[interaction.actor.id];
-      if (!link) {
-        result[ind].links.push(interaction.actor.id);
-      }
-      if (!width) {
-        result[ind].linkWidths[interaction.actor.id] = 1;
-      }
-      else {
-        result[ind].linkWidths[interaction.actor.id] += 1;
-        }
+        populateLinkWidths(result[ind], interaction.actor);
       }
       return result;
     }, activity[0].children);
+
+    activity[0].children.forEach(child => {child.links = Object.keys(child.linkWidths);});
 
     activity[0].children = [...activity[0].children, ...members];
 
@@ -150,8 +140,9 @@ function Graph (props) {
       if (widthsTo && widthsTo[from.dataItem.id]) {
         widthTotal += widthsTo[from.dataItem.id];
       }
-      return widthTotal * 2;
+      return widthTotal;
     })
+    
 
     series.links.template.tooltipText = "Width: [b]{strokeWidth}[/]";
     series.links.template.interactionsEnabled = true;
