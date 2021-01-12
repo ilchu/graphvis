@@ -18,6 +18,7 @@ function Graph (props) {
 
     let test = _.cloneDeep(props.data);
 
+
     let members = [];
     _.reduce(test.posts, function(result, post) {
       let ind = _.findIndex(result, ['name', post.writer.username]);
@@ -29,11 +30,11 @@ function Graph (props) {
           if (!link) {
             result[ind].links.push(post.parentPost.writer.id);
           }
-          if (!!width) {
-            result[ind].linkWidths[post.parentPost.writer.id] += 1;
+          if (!width) {
+            result[ind].linkWidths[post.parentPost.writer.id] = 1;
           }
           else {
-            result[ind].linkWidths[post.parentPost.writer.id] = 1;
+            result[ind].linkWidths[post.parentPost.writer.id] += 1;
             }
         }
       }
@@ -46,20 +47,70 @@ function Graph (props) {
           linkWidths: (!!post.parentPost ? {[post.parentPost.writer.id]: 1} : {}),
         })
       }
+      if (post.interactions && post.interactions.length > 0) {
+        if (ind === -1) { 
+          ind = result.length - 1;
+        }
+        post.interactions.forEach(interaction => {
+          let link = result[ind].links.find(link => link === interaction.actor.id);
+          let width = result[ind].linkWidths[interaction.actor.id];
+          if (!link) {
+            result[ind].links.push(interaction.actor.id);
+          }
+          if (!width) {
+            result[ind].linkWidths[interaction.actor.id] = 1;
+          }
+          else {
+            result[ind].linkWidths[interaction.actor.id] += 1;
+            }
+        })
+      }
       return result;
     }, members); 
 
     console.log('members ==>', members);
     
-    // dont forget to fix the links' widths when both nodes are parents
     // fix the links width and links to fetch from a single field instead of two?
-    // 
+    // fix adding links for self likes?
     let activity = [{
       name: test.posts[0].activity.name,
       id: test.posts[0].activity.id,
       postsCount: test.posts.length,
-      children: members,
+      children: [],
     }];
+    
+    _.reduce(test.posts[0].activity.interactions, function(result, interaction) {
+
+      let ind = _.findIndex(result, ['name', interaction.actor.username]);
+      // if not found, create a new entry
+      if (ind === -1) { 
+        result.push({
+          name: interaction.actor.username,
+          id: interaction.actor.id,
+          postsCount: 0,
+          links: [],
+          linkWidths: {[activity[0].id]: 1},
+        });
+      }
+      // found element, update its links and linkWidths
+      else {
+      let link = result[ind].links.find(link => link === interaction.actor.id);
+      let width = result[ind].linkWidths[interaction.actor.id];
+      if (!link) {
+        result[ind].links.push(interaction.actor.id);
+      }
+      if (!width) {
+        result[ind].linkWidths[interaction.actor.id] = 1;
+      }
+      else {
+        result[ind].linkWidths[interaction.actor.id] += 1;
+        }
+      }
+      return result;
+    }, activity[0].children);
+
+    activity[0].children = [...activity[0].children, ...members];
+
     console.log('activ ==>', activity);
 
     console.log('test ==>', test);
@@ -99,7 +150,7 @@ function Graph (props) {
       if (widthsTo && widthsTo[from.dataItem.id]) {
         widthTotal += widthsTo[from.dataItem.id];
       }
-      return widthTotal;
+      return widthTotal * 2;
     })
 
     series.links.template.tooltipText = "Width: [b]{strokeWidth}[/]";

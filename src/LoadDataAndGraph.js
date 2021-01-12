@@ -176,14 +176,14 @@ export default function LoadDataAndGraph() {
       <h3>Posts:</h3>
       {data.posts.map((post) => (
         <div>
-        Name: {post.writer.username} / Type: {post.type} / Parent: {!!post.parentPost && post.parentPost.writer.username}
+        Name: {post.writer.username} / Member ID: {post.writer.id} / Post ID: {post.id} / Parent: {!!post.parentPost && post.parentPost.writer.username}
         </div>
       )
       )}
       <h3>Interactions:</h3>
       {data.posts.map((post) => (post.interactions.map(interaction => (
         <div>
-          Interaction: {interaction.actor.username} / Type: {interaction.type}
+          Actor: {interaction.actor.username} / Post ID: {post.id}
         </div>
       )
       )
