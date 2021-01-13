@@ -127,6 +127,7 @@ function Graph (props) {
     series.dataFields.children = "children";
     console.log('series.dataItems ==>', series.dataItems);
 
+
     series.links.template.adapter.add("strokeWidth", function(width, target) {
       let from = target.source;
       let to = target.target;
@@ -142,7 +143,6 @@ function Graph (props) {
       }
       return widthTotal;
     })
-    
 
     series.links.template.tooltipText = "Width: [b]{strokeWidth}[/]";
     series.links.template.interactionsEnabled = true;
@@ -152,14 +152,15 @@ function Graph (props) {
     series.nodes.template.tooltipText = "Post count: {postsCount}\nName: {name}";
     series.fontSize = 12;
     series.minRadius = 30;
-    // series.maxRadius = 120;
+    series.centerStrength = 0.3;
+    series.manyBodyStrength = -20;
 
     chart.current = x;
 
     return () => {
       x.dispose();
     };
-  }, [props.data]);
+  }, [props.posts, props.activity]);
 
   return (
     <div id="chartdiv" style={{ width: "100%", height: "600px", }}></div>

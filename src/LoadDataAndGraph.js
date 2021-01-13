@@ -75,7 +75,7 @@ LoadDataAndGraph.fragments = {
   `,
 };
 
-
+// sample IDs for dev
 const GROUP_ID = "5fe17e24563de738c3a21661";
 const ACT_ID = "5fe3e6f8563de738c3a21774";
 
@@ -109,7 +109,7 @@ const getActivitiesQuery = gql`
   ${LoadDataAndGraph.fragments.content}
   `;
 
-const GET_POSTS = gql`
+const GET_POSTS_AND_INTERACTIONS = gql`
   query getPosts($actId: ID!) {
     posts(where: {activity: $actId}) {
       id
@@ -143,10 +143,21 @@ const GET_ACTIVITY = gql`
       ${LoadDataAndGraph.fragments.activity}
     `;
 
+const GET_MEMBER_INTERACTIONS_ACTIVITY = gql`
+  query getMembIntActivity($actId: ID!) {
+    memberInteractions(where: {activity: $actId}) {
+      id
+      actor {username id}
+      receiver {username id}
+      type
+      quantity
+        }
+      }
+    `;
 // Testing display of query results
 export default function LoadDataAndGraph() {
 
-  const { loading, error, data } = useQuery(GET_POSTS, {
+  const { loading, error, data } = useQuery(GET_POSTS_AND_INTERACTIONS, {
     variables: {"actId": ACT_ID},});
 
 
