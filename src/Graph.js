@@ -50,6 +50,7 @@ function Graph (props) {
           name: post.writer.username,
           id: post.writer.id,
           postsCount: 1,
+          interCount: 0,
           linkWidths: (!!post.parentPost ? {[post.parentPost.writer.id]: 1} : {}),
         })
       }
@@ -74,6 +75,7 @@ function Graph (props) {
       name: props.activity.activity.name,
       id: props.activity.activity.id,
       postsCount: test.posts.length,
+      interCount: 0,
       children: [],
     }];
 
@@ -88,10 +90,12 @@ function Graph (props) {
           name: interaction.actor.username,
           id: interaction.actor.id,
           postsCount: 0,
+          interCount: 1,
           linkWidths: {[activity[0].id]: 1},
         });
       }
       else {
+        result[ind].interCount += 1;
         populateLinkWidths(result[ind], interaction.actor);
       }
       return result;
@@ -149,7 +153,7 @@ function Graph (props) {
     series.nodes.template.label.text = "{name}";
     series.nodes.template.label.hideOversized = true;
     series.nodes.template.label.truncate = true;
-    series.nodes.template.tooltipText = "Post count: {postsCount}\nName: {name}";
+    series.nodes.template.tooltipText = "Post count: {postsCount}\nInteraction count: {interCount}";
     series.fontSize = 12;
     series.minRadius = 30;
     series.centerStrength = 0.3;

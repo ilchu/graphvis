@@ -160,18 +160,20 @@ export default function LoadDataAndGraph() {
   const { loading, error, data } = useQuery(GET_POSTS_AND_INTERACTIONS, {
     variables: {"actId": ACT_ID},});
 
-
-
   const { loading:loadingActivity, error:errorActivity, data:activity } = useQuery(GET_ACTIVITY,
     {variables: {"actId": ACT_ID},});
 
+  const { loading:loadingMembInt, error:errorMembInt, data:membInt } = useQuery(GET_MEMBER_INTERACTIONS_ACTIVITY, {
+    variables: {"actId": ACT_ID},});
 
-  if (loading || loadingActivity) return <p>Loading posts and activity data...</p>;
-  if (error || errorActivity) return <p>Error : {error.message} </p>;
+  if (loading || loadingActivity || loadingMembInt) return <p>Loading posts, activity and member interactions data...</p>;
+  if (error || errorActivity || errorMembInt) return <p>Error : {error.message} </p>;
   if (!data) return <p>No posts found</p>;
 
   console.log('data ==>', data);
   console.log('activity ==>', activity);
+  console.log('membInt ==>', membInt);
+
 
   return (
     <div>
@@ -185,12 +187,20 @@ export default function LoadDataAndGraph() {
       <h3>Interactions:</h3>
       {data.posts.map((post) => (post.interactions.map(interaction => (
         <div>
-          Actor: {interaction.actor.username} / Post ID: {post.id}
+          Actor: {interaction.actor.username} / Post ID: {post.id} / Type : {interaction.type}
         </div>
       )
       )
       )
       )}
+      <h3>Member interactions:</h3>
+      {membInt.memberInteractions.map((int) => (
+        <div>
+          Actor: {int.actor.username} / Target: {int.receiver.username} / Type: {int.type}
+        </div>
+      )
+      )
+      }
       <Graph posts={data} activity={activity}/>
     </div>
   );
