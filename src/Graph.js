@@ -155,10 +155,7 @@ function Graph (props) {
     ]
 
     series.data = activity;
-    // series.data = test_members;
     series.dataFields.name = "name";
-    // series.dataFields.name = "id";
-    // series.dataFields.children = "childPosts";
     series.dataFields.id = "id";
     series.dataFields.linkWith = "links";
     series.dataFields.value = "postsCount";
@@ -182,12 +179,31 @@ function Graph (props) {
       return widthTotal;
     })
 
+    series.nodes.template.circle.adapter.add("radius", function(radius, target) {
+      let postsCount = target.dataItem.dataContext.postsCount;
+      let interCount = target.dataItem.dataContext.interCount;
+      let adj = postsCount + interCount;
+      return radius + adj;
+    })
+
+    series.nodes.template.outerCircle.adapter.add("radius", function(radius, target) {
+      let postsCount = target.dataItem.dataContext.postsCount;
+      let interCount = target.dataItem.dataContext.interCount;
+      let adj = postsCount + interCount;
+      return radius + adj;
+    })
+
     series.links.template.tooltipText = "Width: [b]{strokeWidth}[/]";
     series.links.template.interactionsEnabled = true;
+
     series.nodes.template.label.text = "{name}";
     series.nodes.template.label.hideOversized = true;
     series.nodes.template.label.truncate = true;
+
+    series.nodes.template.outerCircle.filters.push(new am4core.DropShadowFilter());
+
     series.nodes.template.tooltipText = "Post count: {postsCount}\nInteraction count: {interCount}";
+
     series.fontSize = 12;
     series.minRadius = 30;
     series.centerStrength = 0.3;
