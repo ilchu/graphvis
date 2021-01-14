@@ -38,16 +38,19 @@ function Graph (props) {
 
     let members = [];
     _.reduce(test.posts, function(result, post) {
+      // Is the member already in the result?
       let ind = _.findIndex(result, ['name', post.writer.username]);
+      // if so, increment posts and establish link
       if (ind !== -1) {
         result[ind].postsCount += 1;
         if (post.parentPost !== null) {
           populateLinkWidths(result[ind], post.parentPost.writer);
         }
       }
+      // otherwise create new entry
       else { 
         result.push({
-          name: post.writer.username,
+          name: post.writer.username, 
           id: post.writer.id,
           postsCount: 1,
           interCount: 0,
@@ -55,25 +58,56 @@ function Graph (props) {
         })
       }
       if (post.interactions && post.interactions.length > 0) {
-        if (ind === -1) { 
-          ind = result.length - 1;
-        }
         post.interactions.forEach(interaction => {
-          populateLinkWidths(result[ind], interaction.actor);
+          let ind = _.findIndex(result, ['name', interaction.actor.username]);
+          if (ind === -1) { 
+            result.push({
+            name: interaction.actor.username, 
+            id: interaction.actor.id,
+            postsCount: 0,
+            interCount: 1,
+            linkWidths: {[post.writer.id]: 1},
+            })
+          }
+          else {
+            result[ind].interCount += 1;
+            populateLinkWidths(result[ind], post.writer);
+          }
         });
       }
       return result;
     }, members); 
-    members.forEach(member => {member.links = Object.keys(member.linkWidths)});
+    // Generating a links field for each member that holds just ids
+    // members.forEach(member => {member.links = Object.keys(member.linkWidths)});
 
+    console.log('membInt graph', props.memberInteractions);
+
+    _.reduce(props.memberInteractions, (result, interaction) => {
+      let ind = _.findIndex(result, ['name', interaction.actor.username]);
+      if (ind !== -1) { 
+        result[ind].interCount += 1;
+        populateLinkWidths(result[ind], interaction.actor);
+      }
+      else {
+        result.push({
+          name: interaction.actor.username,
+          id: interaction.actor.id,
+          postsCount: 0,
+          interCount: 1,
+          linkWidths: {[interaction.receiver.id]: 1},
+        });
+      }
+      return result;
+    }, members)
     console.log('members ==>', members);
+    members.forEach(member => {member.links = Object.keys(member.linkWidths)});
     
     // fix the links width and links to fetch from a single field instead of two?
     // fix adding links for self likes?
     // const addActivity = (sourceQuery, targetArray) => {};
     let activity = [{
-      name: props.activity.activity.name,
-      id: props.activity.activity.id,
+      name: props.activity.name,
+      id: props.activity.id,
       postsCount: test.posts.length,
       interCount: 0,
       children: [],
@@ -81,11 +115,15 @@ function Graph (props) {
 
     console.log('activity ==>', activity);
     
-    _.reduce(props.activity.activity.interactions, function(result, interaction) {
+    _.reduce(props.activity.interactions, function(result, interaction) {
 
       let ind = _.findIndex(result, ['name', interaction.actor.username]);
       // if not found, create a new entry
-      if (ind === -1) { 
+      if (ind !== -1) { 
+        result[ind].interCount += 1;
+        populateLinkWidths(result[ind], interaction.actor);
+      }
+      else {
         result.push({
           name: interaction.actor.username,
           id: interaction.actor.id,
@@ -93,10 +131,6 @@ function Graph (props) {
           interCount: 1,
           linkWidths: {[activity[0].id]: 1},
         });
-      }
-      else {
-        result[ind].interCount += 1;
-        populateLinkWidths(result[ind], interaction.actor);
       }
       return result;
     }, activity[0].children);
@@ -157,7 +191,7 @@ function Graph (props) {
     series.fontSize = 12;
     series.minRadius = 30;
     series.centerStrength = 0.3;
-    series.manyBodyStrength = -20;
+    series.manyBodyStrength = -50;
 
     chart.current = x;
 

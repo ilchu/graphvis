@@ -187,7 +187,7 @@ export default function LoadDataAndGraph() {
       <h3>Interactions:</h3>
       {data.posts.map((post) => (post.interactions.map(interaction => (
         <div>
-          Actor: {interaction.actor.username} / Post ID: {post.id} / Type : {interaction.type}
+          Actor: {interaction.actor.username} / Post writer: {post.writer.username} / Type : {interaction.type}
         </div>
       )
       )
@@ -201,7 +201,7 @@ export default function LoadDataAndGraph() {
       )
       )
       }
-      <Graph posts={data} activity={activity}/>
+      <Graph posts={data} activity={activity.activity} memberInteractions={membInt.memberInteractions}/>
     </div>
   );
 }
