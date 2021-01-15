@@ -1,5 +1,6 @@
 import React, {useRef, useLayoutEffect} from 'react';
 import * as am4core from "@amcharts/amcharts4/core";
+import * as am4charts from "@amcharts/amcharts4/charts";
 import * as  am4plugins_forceDirected from "@amcharts/amcharts4/plugins/forceDirected";
 var _ = require('lodash');
 
@@ -32,6 +33,7 @@ function Graph (props) {
 
     let x = am4core.create("chartdiv", am4plugins_forceDirected.ForceDirectedTree);
     let series = x.series.push(new am4plugins_forceDirected.ForceDirectedSeries());
+    // x.legend = new am4charts.Legend();
 
     let test = _.cloneDeep(props.posts);
 
@@ -60,7 +62,11 @@ function Graph (props) {
       if (post.interactions && post.interactions.length > 0) {
         post.interactions.forEach(interaction => {
           let ind = _.findIndex(result, ['name', interaction.actor.username]);
-          if (ind === -1) { 
+          if (ind !== -1) { 
+            result[ind].interCount += 1;
+            populateLinkWidths(result[ind], post.writer);
+          }
+          else {
             result.push({
             name: interaction.actor.username, 
             id: interaction.actor.id,
@@ -68,10 +74,6 @@ function Graph (props) {
             interCount: 1,
             linkWidths: {[post.writer.id]: 1},
             })
-          }
-          else {
-            result[ind].interCount += 1;
-            populateLinkWidths(result[ind], post.writer);
           }
         });
       }
