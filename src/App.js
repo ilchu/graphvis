@@ -7,20 +7,13 @@ import { client } from "./client";
 
 import LoadDataAndGraph from "./LoadDataAndGraph";
 import QueryForm from "./QueryForm";
-import SplitPane from "./SplitPane";
 
 function App() {
 
   return(
     <ApolloProvider client={client}>
-      <SplitPane
-      left={
-        <QueryForm/>
-      }
-      right={
-        <LoadDataAndGraph/>
-      }
-      />
+      <QueryForm/>
+      <LoadDataAndGraph />
     </ApolloProvider>
   );
 }

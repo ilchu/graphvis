@@ -1,6 +1,5 @@
 import React, {useRef, useLayoutEffect} from 'react';
 import * as am4core from "@amcharts/amcharts4/core";
-import * as am4charts from "@amcharts/amcharts4/charts";
 import * as  am4plugins_forceDirected from "@amcharts/amcharts4/plugins/forceDirected";
 var _ = require('lodash');
 
@@ -33,7 +32,6 @@ function Graph (props) {
 
     let x = am4core.create("chartdiv", am4plugins_forceDirected.ForceDirectedTree);
     let series = x.series.push(new am4plugins_forceDirected.ForceDirectedSeries());
-    // x.legend = new am4charts.Legend();
 
     let test = _.cloneDeep(props.posts);
 
@@ -145,16 +143,16 @@ function Graph (props) {
 
     console.log('test ==>', test);
 
-    let test_members = [
-      {id: "A",
-      postsCount: 15,
-      links: ["B"],
-      linkWidths: {"B": 100},},
-      {id: "B",
-      postsCount: 5,
-      links: ["A"],
-      linkWidths: {"A": 9},},
-    ]
+    // let test_members = [
+    //   {id: "A",
+    //   postsCount: 15,
+    //   links: ["B"],
+    //   linkWidths: {"B": 100},},
+    //   {id: "B",
+    //   postsCount: 5,
+    //   links: ["A"],
+    //   linkWidths: {"A": 9},},
+    // ]
 
     series.data = activity;
     series.dataFields.name = "name";
